@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aadhaar - Unique Identification Authority of India</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        :root {
+            --uidai-dark-blue: #0b1c53;
+            --uidai-link-blue: #000080;
+            --uidai-green: #0b7b1e;
+            --uidai-cyan: #00a8d6;
+            --uidai-text: #333333;
+            --bg-gray: #f2f5f7;
+            --border-light: #dce0e3;
+            --error-red: #d32f2f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: #e0e0e0; 
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        /* STRICT MOBILE FRAME */
+        #app-container {
+            width: 100%; max-width: 480px; background-color: #ffffff;
+            min-height: 100vh; position: relative; overflow-x: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+        }
+
+        /* TOP SCROLLING ANNOUNCEMENT BANNER */
+        .announcement-banner {
+            background-color: #b71c1c; 
+            color: #ffffff; font-size: 12px; font-weight: 500;
+            padding: 6px 0; position: sticky; top: 0; z-index: 1005;
+            overflow: hidden; white-space: nowrap; display: flex;
+            align-items: center; border-bottom: 1px solid #7f0000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .announcement-text {
+            display: inline-block; padding-left: 100%;
+            animation: scrollBanner 30s linear infinite;
+        }
+        @keyframes scrollBanner {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(90deg, #fdf1d1 0%, #eef8d8 50%, #dff6e3 100%);
+            padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .aadhaar-logo-img { height: 38px; object-fit: contain; }
+        .header-hindi-text { font-size: 13px; font-weight: 700; color: var(--error-red); line-height: 1.2; display: flex; flex-direction: column; }
+        .header-hindi-text span.green { color: var(--uidai-green); }
+        .header-right-text { font-size: 10px; font-weight: 600; color: #222; text-align: left; max-width: 120px; line-height: 1.3; }
+
+        /* ACTION BAR */
+        .action-bar {
+            display: flex; align-items: center; padding: 10px 16px; background: #fff;
+            border-bottom: 1px solid var(--border-light); box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .hamburger { width: 28px; cursor: pointer; display: flex; flex-direction: column; gap: 5px; margin-right: 14px; padding: 4px 0; }
+        .hamburger .line { height: 3px; background-color: #005580; width: 100%; border-radius: 2px; transition: 0.2s; }
+        .hamburger:active .line { opacity: 0.6; }
+        
+        .search-wrapper { flex-grow: 1; display: flex; align-items: center; height: 36px; border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+        .search-wrapper input { width: 100%; height: 100%; border: none; outline: none; font-size: 14px; color: var(--uidai-text); padding: 0 10px; background: #fafafa; }
+        .search-wrapper input:focus { background: #fff; }
+        .go-btn { background: #004d99; color: white; border: none; height: 36px; padding: 0 18px; font-weight: 500; font-size: 14px; cursor: pointer; transition: background 0.2s; }
+        .go-btn:active { background: #003366; }
+        
+        .lang-toggle { font-weight: 700; color: #004d99; font-size: 15px; margin-left: 14px; display: flex; align-items: flex-end; cursor: pointer; padding: 4px; border-radius: 4px; }
+        .lang-toggle:active { background: #f0f0f0; }
+
+        /* SIDE DRAWER */
+        .drawer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s; }
+        .drawer-overlay.active { display: block; opacity: 1; }
+        .side-drawer { position: fixed; top: 0; left: -100%; width: 280px; max-width: 80%; height: 100%; background: #fff; z-index: 2001; transition: left 0.3s ease; display: flex; flex-direction: column; box-shadow: 2px 0 12px rgba(0,0,0,0.15); }
+        .side-drawer.active { left: 0; }
+        .drawer-header { background: var(--uidai-dark-blue); padding: 16px; display: flex; align-items: center; gap: 16px; color: white; }
+        .drawer-item { padding: 16px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; color: var(--uidai-dark-blue); cursor: pointer; transition: background 0.2s; }
+        .drawer-item:active { background: #f0f0f0; }
+
+        /* MAIN CONTENT AREA */
+        .content-area { padding: 16px; background: #fff; flex-grow: 1; }
+
+        /* UIDAI CARD DESIGN */
+        .uidai-card {
+            border: 1px solid var(--border-light); border-radius: 8px; padding: 18px;
+            margin-bottom: 20px; border-top: 3px solid var(--uidai-cyan);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03); transition: box-shadow 0.2s;
+        }
+        .card-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .card-icon { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--uidai-cyan); display: flex; justify-content: center; align-items: center; color: var(--uidai-dark-blue); background: #f4faff; }
+        .card-icon svg { width: 22px; height: 22px; fill: currentColor; }
+        .card-title { font-size: 17px; font-weight: 700; color: var(--uidai-dark-blue); display: flex; align-items: center; gap: 6px; }
+        .card-subtitle { font-size: 14px; font-weight: 700; color: var(--uidai-green); margin-bottom: 10px; }
+        .card-desc { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 16px; }
+        .card-links { list-style: none; }
+        .card-links li { margin-bottom: 14px; font-size: 14px; font-weight: 500; color: var(--uidai-link-blue); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .card-links li::before { content: '•'; color: var(--uidai-cyan); font-size: 18px; line-height: 1; }
+
+        /* COMPACT NAVRATRI CARD */
+        .navratri-card { border-top: 3px solid var(--error-red); background: linear-gradient(to bottom, #fffaf0, #ffffff); padding: 20px; text-align: center; }
+        .navratri-card .card-title { justify-content: center; color: var(--error-red); font-size: 18px; margin-bottom: 6px; }
+        .navratri-card .card-subtitle { color: #666; font-size: 13px; margin-bottom: 20px; font-weight: 500; }
+        
+        /* IMPROVED BUTTONS */
+        .btn-action { background: var(--uidai-dark-blue); color: white; border: none; padding: 14px 24px; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; width: 100%; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(11, 28, 83, 0.2); }
+        .btn-action:active { background: #081236; transform: scale(0.97); }
+
+        .btn-outline { flex: 1; padding: 14px; border: 1px solid var(--border-light); color: #555; background: #fff; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-size: 13px; }
+        .btn-outline:active { background: #f0f0f0; transform: scale(0.97); }
+        .btn-fill { flex: 1; padding: 14px; border: none; color: #fff; background: var(--uidai-dark-blue); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; font-size: 13px; }
+        .btn-fill:disabled { background: #b0bec5; cursor: not-allowed; }
+        .btn-fill:not(:disabled):active { background: #081236; transform: scale(0.97); }
+
+        /* OVERLAYS */
+        .page-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-gray); z-index: 1500; display: none; flex-direction: column; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .page-overlay.active { display: flex; transform: translateX(0); }
+        .page-header { background: #ffffff; border-bottom: 1px solid var(--border-light); padding: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.03); z-index: 10; }
+        .header-left-grp { display: flex; align-items: center; gap: 12px; }
+        .back-btn { background: none; border: none; font-size: 24px; color: var(--uidai-dark-blue); cursor: pointer; padding: 4px; border-radius: 50%; transition: 0.2s; }
+        .back-btn:active { background: #f0f0f0; }
+        .page-title { font-size: 16px; font-weight: 600; color: var(--uidai-dark-blue); }
+        .page-content { padding: 16px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+        /* QUIZ & TRACKING FORM UI */
+        .form-group { margin-bottom: 16px; background: #fff; padding: 20px; border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); width: 100%; }
+        .form-label { font-size: 15px; font-weight: 500; color: #222; margin-bottom: 16px; display: block; line-height: 1.5; }
+        
+        .radio-option { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #444; padding: 14px; border: 1px solid var(--border-light); border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .radio-option:has(input:checked) { border-color: var(--uidai-cyan); background: #f0faff; font-weight: 500; color: var(--uidai-dark-blue); }
+        .radio-option input { margin: 0; accent-color: var(--uidai-cyan); width: 18px; height: 18px; }
+        
+        .text-input { width: 100%; padding: 14px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 14px; outline: none; background: #fafafa; transition: 0.2s; }
+        .text-input:focus { border-color: var(--uidai-cyan); background: #fff; box-shadow: 0 0 0 2px rgba(0, 168, 214, 0.1); }
+        textarea.text-input { height: 140px; resize: none; line-height: 1.5; }
+
+        .tnc-box { background: #fff9e6; border: 1px solid #ffe082; padding: 14px; border-radius: 6px; margin-top: 16px; }
+        .tnc-label { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #555; cursor: pointer; line-height: 1.4; }
+        .tnc-label input { margin-top: 2px; accent-color: var(--uidai-dark-blue); width: 16px; height: 16px; }
+
+        .btn-row { display: flex; gap: 12px; margin-top: 20px; width: 100%; }
+        .timer-badge { background: #fff; border: 1px solid #ffcccc; color: var(--error-red); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; }
+
+        /* PROFESSIONAL TIMELINE (TRACKING) */
+        .timeline-container { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid var(--border-light); margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .timeline { position: relative; padding: 0; list-style: none; margin: 10px 0 0 0; }
+        .timeline::before { content: ""; position: absolute; left: 11px; top: 0; bottom: 0; width: 2px; background: #e0e0e0; }
+        .timeline-item { position: relative; padding-left: 36px; margin-bottom: 24px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-item::before { content: ""; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 2px solid #ccc; z-index: 2; transition: 0.3s; }
+        .timeline-item.active::before { border-color: var(--uidai-green); background: var(--uidai-green); }
+        .timeline-item.active ~ .timeline-item::before { border-color: #ccc; background: #fff; }
+        .timeline-item.active .timeline-title { color: var(--uidai-green); font-weight: 700; }
+        .timeline-title { font-size: 14px; font-weight: 600; color: #555; }
+        .timeline-date { font-size: 12px; color: #888; margin-top: 4px; }
+
+        /* STATUS / LOADING VIEWS - FIX: FORCED TO TOP */
+        .status-box { background: #fff; padding: 32px 24px; text-align: center; border-radius: 8px; border: 1px solid var(--border-light); box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: auto; }
+        .status-icon { width: 56px; height: 56px; fill: var(--uidai-green); margin-bottom: 16px; }
+        .status-title { font-size: 18px; color: var(--uidai-dark-blue); font-weight: 700; margin-bottom: 8px; }
+        .status-data { font-family: monospace; font-size: 26px; font-weight: 700; color: #111; background: #f4f6f8; border: 1px dashed #ccc; padding: 14px; border-radius: 6px; margin: 20px 0; letter-spacing: 3px; }
+        
+        .pulse-logo { height: 60px; margin-bottom: 16px; animation: pulseAnim 1s infinite; }
+        @keyframes pulseAnim { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
+
+        /* ERROR TOAST */
+        #toast { visibility: hidden; min-width: 250px; background-color: var(--error-red); color: #fff; text-align: center; border-radius: 6px; padding: 14px; position: absolute; z-index: 4000; left: 50%; top: 20px; transform: translateX(-50%); font-size: 14px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.2s, top 0.2s; }
+        #toast.show { visibility: visible; top: 40px; opacity: 1; }
+
+        /* GOVERNMENT FOOTER */
+        .gov-footer { background: #fafafa; border-top: 1px solid var(--border-light); padding: 24px 16px; text-align: center; margin-top: auto; }
+        .gov-footer-title { font-size: 14px; font-weight: 700; color: #555; margin-bottom: 12px; text-transform: uppercase; }
+        .gov-footer-links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+        .gov-footer-links a { font-size: 12px; color: var(--uidai-link-blue); text-decoration: none; font-weight: 500; }
+        .gov-footer-text { font-size: 11px; color: #888; }
+
+        /* NEW: AADHAAR MITRA ASSISTANT */
+        .assistant-btn {
+            position: absolute; bottom: 20px; right: 20px;
+            width: 56px; height: 56px; background: var(--uidai-dark-blue);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .assistant-btn:active { transform: scale(0.9); background: #081236; }
+        .assistant-btn svg { width: 30px; fill: white; }
+        
+        .assistant-box {
+            position: absolute; bottom: 85px; right: 20px;
+            width: 260px; background: white; border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25); z-index: 1000;
+            display: none; flex-direction: column; overflow: hidden;
+            border: 1px solid var(--border-light); transform: translateY(10px); opacity: 0; transition: all 0.3s ease;
+        }
+        .assistant-box.active { display: flex; transform: translateY(0); opacity: 1; }
+        .assistant-header { background: var(--uidai-dark-blue); color: white; padding: 12px 16px; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .assistant-header span.close-x { cursor: pointer; font-size: 18px; line-height: 1; opacity: 0.8; }
+        .assistant-body { padding: 16px; font-size: 13px; color: #444; line-height: 1.5; background: #fafafa; }
+        .assistant-body b { color: var(--uidai-dark-blue); font-size: 14px; }
+
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    
+    <div class="announcement-banner">
+        <span class="announcement-text">This platform is developed strictly for educational and demonstration purposes only. It is not affiliated with UIDAI or any Government authority. No personal data is officially collected or used for any legal or commercial purpose. This project does not intend to harm, mislead, or violate any copyright, trademark, or official system. Developed by Vishal Surya.</span>
+    </div>
+
+    <header>
+        <div class="header-left">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Aadhaar_Logo.svg/1200px-Aadhaar_Logo.svg.png" alt="Aadhaar Logo" class="aadhaar-logo-img">
+            <div class="header-hindi-text">
+                <span class="lang-text" data-en="Mera Aadhaar" data-hi="मेरा आधार">मेरा आधार</span><br>
+                <span class="green lang-text" data-en="Meri Pehchaan" data-hi="मेरी पहचान">मेरी पहचान</span>
+            </div>
+        </div>
+        <div class="header-right-text lang-text" data-en="Unique Identification Authority of India" data-hi="भारतीय विशिष्ट पहचान प्राधिकरण">
+            Unique Identification<br>Authority of India
+        </div>
+    </header>
+
+    <div class="action-bar">
+        <div class="hamburger" onclick="toggleSidebar()">
+            <div class="line"></div>
+            <div class="line short"></div>
+            <div class="line"></div>
+        </div>
+        <div class="search-wrapper">
+            <input type="text" placeholder="Search Portal...">
+        </div>
+        <button class="go-btn">Go</button>
+        <div class="lang-toggle" onclick="toggleLanguage()" id="langBtn">A<sub>अ</sub></div>
+    </div>
+
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleSidebar()"></div>
+    <div class="side-drawer" id="sideDrawer">
+        <div class="drawer-header">
+            <svg style="width:24px; fill:white; cursor:pointer;" viewBox="0 0 24 24" onclick="toggleSidebar()"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            <span style="font-weight:600; font-size: 16px;">Navigation</span>
+        </div>
+        <div class="drawer-item" onclick="openOverlay('quiz-page'); toggleSidebar();">
+            <svg style="width:20px; fill:var(--uidai-dark-blue);" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            <span class="lang-text" data-en="Participate (Gifts 2026)" data-hi="भाग लें (उपहार 2026)">Participate (Gifts 2026)</span>
+        </div>
+        <div class="drawer-item" onclick="openOverlay('track-page'); toggleSidebar();">
+            <svg style="width:20px; fill:var(--uidai-dark-blue);" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            <span class="lang-text" data-en="Track Application" data-hi="आवेदन ट्रैक करें">Track Application</span>
+        </div>
+        <div class="drawer-item" onclick="toggleSidebar();">
+            <svg style="width:20px; fill:var(--uidai-dark-blue);" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            <span class="lang-text" data-en="About UIDAI" data-hi="यूआईडीएआई के बारे में">About UIDAI</span>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="uidai-card navratri-card">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Aadhaar_Logo.svg/1200px-Aadhaar_Logo.svg.png" alt="Aadhaar Logo" style="height:42px; margin-bottom:12px; mix-blend-mode: multiply;">
+            <div class="card-title lang-text" data-en="Happy Navratri &nbsp;›" data-hi="शुभ नवरात्रि &nbsp;›">Happy Navratri &nbsp;›</div>
+            <div class="card-subtitle lang-text" data-en="Aadhar Gifts 2026 Participation Scheme By Vishal Surya" data-hi="आधार उपहार 2026 भागीदारी योजना">Aadhar Gifts 2026 Participation Scheme</div>
+            <button class="btn-action lang-text" data-en="Start Participating" data-hi="अभी भाग लें" onclick="openOverlay('quiz-page')">Start Participating</button>
+        </div>
+
+        <div class="uidai-card">
+            <div class="card-title-row">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24"><path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.04.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>
+                </div>
+                <div class="card-title lang-text" data-en="Update Aadhaar &nbsp;›" data-hi="आधार अपडेट करें &nbsp;›">Update Aadhaar &nbsp;›</div>
+            </div>
+            <div class="card-subtitle lang-text" data-en="Keep your Aadhaar details up-to-date." data-hi="अपना आधार विवरण अद्यतन रखें।">Keep your Aadhaar details up-to-date.</div>
+            <div class="card-desc lang-text" data-en="It is essential that your Aadhaar Data is correct and remains updated always." data-hi="यह आवश्यक है कि आपका आधार डेटा सही हो।">It is essential that your Aadhaar Data is correct and remains updated always.</div>
+            <ul class="card-links">
+                <li onclick="openOverlay('track-page')" class="lang-text" data-en="Track Application Status" data-hi="आवेदन की स्थिति ट्रैक करें">Track Application Status</li>
+                <li class="lang-text" data-en="Check Aadhaar Update Status" data-hi="आधार अपडेट स्थिति जांचें">Check Aadhaar Update Status</li>
+                <li class="lang-text" data-en="Update Demographics Data" data-hi="जनसांख्यिकी डेटा अपडेट करें">Update Demographics Data</li>
+            </ul>
+        </div>
+
+        <div class="uidai-card">
+            <div class="card-title-row">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                </div>
+                <div class="card-title lang-text" data-en="Aadhaar Services &nbsp;›" data-hi="आधार सेवाएँ &nbsp;›">Aadhaar Services &nbsp;›</div>
+            </div>
+            <div class="card-desc lang-text" data-en="Securely access and manage your Aadhaar profile online." data-hi="सुरक्षित रूप से अपना आधार प्रोफाइल प्रबंधित करें।">Securely access and manage your Aadhaar profile online.</div>
+            <ul class="card-links">
+                <li class="lang-text" data-en="Verify Email/Mobile Number" data-hi="ईमेल/मोबाइल नंबर सत्यापित करें">Verify Email/Mobile Number</li>
+                <li class="lang-text" data-en="Retrieve Lost UID/EID" data-hi="खोया हुआ यूआईडी प्राप्त करें">Retrieve Lost UID/EID</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer class="gov-footer">
+        <div class="gov-footer-title lang-text" data-en="Government of India" data-hi="भारत सरकार">Government of India</div>
+        <div class="gov-footer-links">
+            <a href="#" class="lang-text" data-en="Privacy Policy" data-hi="गोपनीयता नीति">Privacy Policy</a>
+            <a href="#" class="lang-text" data-en="Terms & Conditions" data-hi="नियम और शर्तें">Terms & Conditions</a>
+            <a href="#" class="lang-text" data-en="Help / Support" data-hi="सहायता">Help / Support</a>
+        </div>
+        <div class="gov-footer-text">Copyright © 2026 Unique Identification Authority of India. All Rights Reserved.</div>
+    </footer>
+
+    <div class="assistant-btn" onclick="toggleAssistant()">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
+    </div>
+    <div class="assistant-box" id="assistantBox">
+        <div class="assistant-header">
+            <span>Aadhaar Mitra</span>
+            <span class="close-x" onclick="toggleAssistant()">✕</span>
+        </div>
+        <div class="assistant-body">
+            <b>Namaste!</b><br><br>I am your Aadhaar Assistant. How can we assist you with your queries today?
+        </div>
+    </div>
+
+    <div class="page-overlay" id="track-page">
+        <div class="page-header">
+            <div class="header-left-grp">
+                <button class="back-btn" onclick="closeOverlaySafe('track-page')">←</button>
+                <span class="page-title lang-text" data-en="Track Status" data-hi="स्थिति ट्रैक करें">Track Status</span>
+            </div>
+        </div>
+        <div class="page-content" id="track-content-scroll">
+            <div class="form-group" style="margin-top:16px;">
+                <label class="form-label lang-text" data-en="Enter 5-Digit Application ID" data-hi="5-अंकीय एप्लिकेशन आईडी दर्ज करें">Enter 5-Digit Application ID</label>
+                <input type="number" id="trackIdInput" class="text-input" placeholder="e.g. 48291" maxlength="5" oninput="if(this.value.length > 5) this.value = this.value.slice(0, 5);">
+                <div class="btn-row">
+                    <button class="btn-fill lang-text" data-en="Check Status" data-hi="स्थिति जांचें" onclick="trackGift()">Check Status</button>
+                </div>
+            </div>
+            <div id="trackResultContainer" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="page-overlay" id="quiz-page">
+        <div class="page-header">
+            <div class="header-left-grp">
+                <button class="back-btn" onclick="confirmExit()">←</button>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Aadhaar_Logo.svg/1200px-Aadhaar_Logo.svg.png" style="height:24px;">
+                    <div style="display:flex; flex-direction:column; line-height:1.2;">
+                        <span style="font-size:10px; font-weight:700; color:var(--error-red);">भारत सरकार</span>
+                        <span class="page-title lang-text" data-en="Evaluation Portal" data-hi="मूल्यांकन पोर्टल" style="font-size:13px;">Evaluation Portal</span>
+                    </div>
+                </div>
+            </div>
+            <div class="timer-badge" id="timer">01:00</div>
+        </div>
+        
+        <div class="page-content" id="quiz-scroll-container">
+            <div id="quiz-ui" style="margin-top:16px;"></div>
+
+            <div id="loading-view" style="display:none; justify-content:flex-start; align-items:center; flex-direction:column; padding-top:32px;">
+                <div class="status-box" style="width:100%;">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Aadhaar_Logo.svg/1200px-Aadhaar_Logo.svg.png" class="pulse-logo" alt="Processing">
+                    <div class="status-title lang-text" data-en="Processing Application" data-hi="आवेदन संसाधित किया जा रहा है">Processing Application</div>
+                    <div style="font-size:14px; color:#666; margin-top:12px;" class="lang-text" data-en="Verifying securely..." data-hi="सुरक्षित सत्यापन हो रहा है...">Verifying securely...</div>
+                </div>
+            </div>
+
+            <div id="success-view" style="display:none; justify-content:flex-start; align-items:center; flex-direction:column; padding-top:32px;">
+                <div class="status-box" style="width:100%;">
+                    <svg class="status-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <div class="status-title lang-text" data-en="Successfully Submitted" data-hi="सफलतापूर्वक सबमिट किया गया">Successfully Submitted</div>
+                    <p style="font-size: 14px; color: #555; margin-top:4px;" class="lang-text" data-en="Please securely save your 5-Digit Application ID." data-hi="कृपया अपनी 5-अंकीय एप्लिकेशन आईडी सुरक्षित रखें।">Please securely save your 5-Digit Application ID.</p>
+                    <div class="status-data" id="generated-id-display"></div>
+                    
+                    <div class="btn-row" style="margin-top: 24px;">
+                        <button class="btn-outline lang-text" data-en="Track Status" data-hi="स्थिति ट्रैक करें" onclick="closeOverlaySafe('quiz-page'); openOverlay('track-page');">Track Status</button>
+                        <button class="btn-fill lang-text" data-en="Done" data-hi="पूर्ण" onclick="closeOverlaySafe('quiz-page'); location.reload();">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+</div>
+
+<audio id="success-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyBH8WtgMZtOzCjt-RWb1IRbS9rPf3JzvuM",
+        authDomain: "gsss-sarol.firebaseapp.com",
+        databaseURL: "https://gsss-sarol-default-rtdb.firebaseio.com",
+        projectId: "gsss-sarol",
+        storageBucket: "gsss-sarol.firebasestorage.app",
+        messagingSenderId: "907647917574",
+        appId: "1:907647917574:web:f5ce1168aca4f9783c6d87",
+        measurementId: "G-39RLQ4QTZ6"
+    };
+
+    try {
+        const app = initializeApp(firebaseConfig);
+        window.fbDb = getFirestore(app);
+        window.fbDoc = doc; 
+        window.fbSetDoc = setDoc; 
+        window.fbGetDoc = getDoc;
+    } catch(e) { console.warn("Firebase fallback mode active."); }
+</script>
+
+<script>
+    /* --- AADHAAR ASSISTANT FIX --- */
+    function toggleAssistant() {
+        const box = document.getElementById('assistantBox');
+        if(box.classList.contains('active')) {
+            box.classList.remove('active');
+        } else {
+            box.classList.add('active');
+        }
+    }
+
+    /* --- HAMBURGER MENU FIX --- */
+    function toggleSidebar() {
+        const drawer = document.getElementById('sideDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        
+        if(drawer.classList.contains('active')) {
+            drawer.classList.remove('active');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 300);
+        } else {
+            overlay.style.display = 'block';
+            setTimeout(() => {
+                drawer.classList.add('active');
+                overlay.classList.add('active');
+            }, 10);
+        }
+    }
+
+    /* --- UTILS & BACK BUTTON NAVIGATION (FIXED) --- */
+    function showToast(msg) {
+        const toast = document.getElementById("toast");
+        toast.innerText = msg;
+        toast.classList.add("show");
+        setTimeout(() => { toast.classList.remove("show"); }, 1500);
+    }
+
+    function openOverlay(id) {
+        const overlay = document.getElementById(id);
+        overlay.classList.add('active');
+        if(id === 'quiz-page') {
+            initQuiz();
+        } else {
+            // Guarantee top scroll on opening
+            const contentScroll = overlay.querySelector('.page-content');
+            if(contentScroll) contentScroll.scrollTop = 0;
+        }
+    }
+
+    function closeOverlaySafe(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    /* --- LANGUAGE TOGGLE --- */
+    let currentLang = 'en';
+    function toggleLanguage() {
+        currentLang = currentLang === 'en' ? 'hi' : 'en';
+        document.getElementById('langBtn').innerHTML = currentLang === 'en' ? 'A<sub>अ</sub>' : 'अ<sub>A</sub>';
+        
+        document.querySelectorAll('.lang-text').forEach(el => {
+            el.innerHTML = el.getAttribute('data-' + currentLang);
+        });
+    }
+
+    /* --- TRUE RANDOMIZATION & QUIZ SYSTEM --- */
+    const baseQuestions = [
+        { q: "Under the FRBM Act, what is the primary objective concerning revenue deficit?", o: ["Elimination of Revenue Deficit", "Capping it at 5% of GDP", "Replacing it with Fiscal Deficit"], type: 'mcq' },
+        { q: "Which indicator is most directly impacted by a high Fiscal Deficit?", o: ["Foreign Exchange Reserves", "Inflation Rate", "Literacy Rate"], type: 'mcq' },
+        { q: "The 'Basic Structure Doctrine' was established in which Supreme Court judgment?", o: ["Golaknath Case", "Minerva Mills Case", "Kesavananda Bharati Case"], type: 'mcq' },
+        { q: "The principle of 'Cooperative Federalism' is represented by?", o: ["Inter-State Council", "Election Commission", "NITI Aayog"], type: 'mcq' },
+        { q: "Critically analyze the role of digital infrastructure in public service delivery.", type: 'desc' }
+    ];
+
+    let activeQuestions = [];
+    let currentQ = 0, timerVal = 60, timerInterval, answers = {};
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function initQuiz() {
+        activeQuestions = JSON.parse(JSON.stringify(baseQuestions)); 
+        shuffleArray(activeQuestions);
+        activeQuestions.forEach(q => { if(q.type === 'mcq') shuffleArray(q.o); });
+
+        currentQ = 0; timerVal = 60; answers = {};
+        
+        // Fully reset views for bulletproof back-button logic
+        document.getElementById('quiz-ui').style.display = 'block';
+        document.getElementById('loading-view').style.display = 'none';
+        document.getElementById('success-view').style.display = 'none';
+        document.getElementById('quiz-scroll-container').scrollTop = 0;
+        
+        loadQuestion();
+        startTimer();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        const tEl = document.getElementById('timer');
+        tEl.innerText = `00:60`; // Default visually before tick
+        timerInterval = setInterval(() => {
+            timerVal--;
+            tEl.innerText = `00:${timerVal.toString().padStart(2, '0')}`;
+            if(timerVal <= 0) { clearInterval(timerInterval); beginSubmission(); }
+        }, 1000);
+    }
+
+    function validateAnswer() {
+        const q = activeQuestions[currentQ];
+        const btn = document.getElementById('next-btn');
+        let isValid = false;
+        
+        if(q.type === 'mcq') {
+            isValid = !!document.querySelector('input[name="opt"]:checked');
+        } else {
+            const descArea = document.getElementById('desc-ans');
+            isValid = descArea && descArea.value.trim().length >= 5;
+        }
+
+        // Mandatory Top Validations
+        if(currentQ === 4) {
+            const tnc = document.getElementById('tnc-checkbox');
+            const name = document.getElementById('user-name');
+            const mobile = document.getElementById('user-mobile');
+            
+            if(!tnc || !tnc.checked) isValid = false;
+            if(!name || name.value.trim().length < 3) isValid = false;
+            if(!mobile || mobile.value.trim().length !== 10) isValid = false;
+        }
+
+        if(btn) btn.disabled = !isValid;
+    }
+
+    function loadQuestion() {
+        const q = activeQuestions[currentQ];
+        let html = `<div class="form-group">
+            <span style="font-size:12px; color:#777; font-weight:700; text-transform:uppercase;">Question ${currentQ+1} of 5</span>
+            <div class="form-label">${q.q}</div>`;
+        
+        if(q.type === 'mcq') {
+            q.o.forEach((opt, i) => {
+                const isChk = answers[currentQ] === i ? 'checked' : '';
+                html += `<label class="radio-option" onclick="setTimeout(validateAnswer, 50)">
+                            <input type="radio" name="opt" value="${i}" ${isChk}> ${opt}
+                         </label>`;
+            });
+        } else {
+            html += `<textarea id="desc-ans" class="text-input" placeholder="Enter your detailed response here..." oninput="validateAnswer()">${answers[currentQ]||''}</textarea>`;
+        }
+        
+        if(currentQ === 4) {
+            html += `<div style="margin-top:20px; border-top:1px solid #eee; padding-top:16px;">
+                        <label class="form-label" style="font-size:13px; margin-bottom:8px; color:#555;">Full Name (As per Aadhaar)</label>
+                        <input type="text" id="user-name" class="text-input" placeholder="Enter Full Name" oninput="validateAnswer()" style="margin-bottom:12px; padding:12px;">
+                        
+                        <label class="form-label" style="font-size:13px; margin-bottom:8px; color:#555;">Mobile Number</label>
+                        <input type="number" id="user-mobile" class="text-input" placeholder="10-Digit Mobile No." oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10); validateAnswer();" style="margin-bottom:8px; padding:12px;">
+                        
+                        <div class="tnc-box" style="margin-top:12px;">
+                            <label class="tnc-label">
+                                <input type="checkbox" id="tnc-checkbox" onchange="validateAnswer()">
+                                <span>I agree and accept the Terms and Conditions of the Aadhar Gifts 2026 Scheme.</span>
+                            </label>
+                        </div>
+                     </div>`;
+        }
+        
+        html += `</div>
+            <div class="btn-row">
+                <button class="btn-outline" onclick="prevQ()" ${currentQ===0?'disabled':''}>Previous</button>
+                <button class="btn-fill" id="next-btn" onclick="nextQ()" disabled>${currentQ===4?'Submit Application':'Next'}</button>
+            </div>`;
+            
+        document.getElementById('quiz-ui').innerHTML = html;
+        validateAnswer();
+    }
+
+    function saveAns() {
+        const q = activeQuestions[currentQ];
+        if(q.type === 'mcq') {
+            const sel = document.querySelector('input[name="opt"]:checked');
+            if(sel) answers[currentQ] = parseInt(sel.value);
+        } else {
+            const desc = document.getElementById('desc-ans');
+            if(desc) answers[currentQ] = desc.value;
+        }
+    }
+
+    function nextQ() { saveAns(); if(currentQ < 4) { currentQ++; loadQuestion(); } else { beginSubmission(); } }
+    function prevQ() { saveAns(); if(currentQ > 0) { currentQ--; loadQuestion(); } }
+
+    function confirmExit() {
+        if(confirm("Exit portal? Your current progress will be lost.")) {
+            clearInterval(timerInterval);
+            closeOverlaySafe('quiz-page');
+            // Clean up to ensure it works properly next time it's opened
+            document.getElementById('quiz-ui').innerHTML = '';
+        }
+    }
+
+    /* --- STRICT 2-SECOND PROCESSING & TOP ALIGNMENT (FIXED) --- */
+    function beginSubmission() {
+        clearInterval(timerInterval);
+        saveAns();
+        document.getElementById('quiz-ui').style.display = 'none';
+        
+        const loadingView = document.getElementById('loading-view');
+        loadingView.style.display = 'flex';
+        
+        // Critical FIX: Force scroll to top instantly
+        document.getElementById('quiz-scroll-container').scrollTop = 0;
+        window.scrollTo(0,0);
+        
+        setTimeout(() => { finalizeData(); }, 2000);
+    }
+
+    async function finalizeData() {
+        const uniqueID = Math.floor(10000 + Math.random() * 90000).toString();
+        const payload = { status: "Application Received", timestamp: new Date().toISOString() };
+
+        localStorage.setItem(uniqueID, JSON.stringify(payload));
+
+        try {
+            if(window.fbDb) await window.fbSetDoc(window.fbDoc(window.fbDb, "submissions", uniqueID), payload);
+        } catch(e) {}
+
+        try { document.getElementById('success-sound').play(); } catch(e){}
+
+        document.getElementById('loading-view').style.display = 'none';
+        
+        const successView = document.getElementById('success-view');
+        successView.style.display = 'flex';
+        
+        // Critical FIX: Absolute lock to top of screen
+        document.getElementById('quiz-scroll-container').scrollTop = 0; 
+        window.scrollTo(0,0);
+        
+        document.getElementById('generated-id-display').innerText = uniqueID;
+        document.getElementById('trackIdInput').value = uniqueID;
+    }
+
+    /* --- ADVANCED TIMELINE TRACKING --- */
+    async function trackGift() {
+        const id = document.getElementById('trackIdInput').value.trim();
+        const box = document.getElementById('trackResultContainer');
+        
+        if(!id || id.length !== 5) {
+            showToast("Invalid Application ID"); 
+            return;
+        }
+        
+        box.style.display = 'block';
+        box.innerHTML = `<div style="padding:16px; text-align:center;"><div style="width:30px; height:30px; border:2px solid #f3f3f3; border-top-color:var(--uidai-dark-blue); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 10px auto;"></div><span style="color:#666; font-size:14px;">Verifying Database...</span></div>`;
+        
+        // Ensure scroll brings loader into view
+        document.getElementById('track-content-scroll').scrollTop = box.offsetTop;
+        
+        let data = null;
+        try {
+            if(window.fbDb) {
+                const snap = await window.fbGetDoc(window.fbDoc(window.fbDb, "submissions", id));
+                if(snap.exists()) data = snap.data();
+            } else throw new Error();
+        } catch(e) {
+            data = JSON.parse(localStorage.getItem(id) || "null");
+        }
+
+        setTimeout(() => {
+            if(data) {
+                renderTimeline(data);
+                document.getElementById('track-content-scroll').scrollTop = box.offsetTop - 20;
+            } else {
+                box.style.display = 'none';
+                showToast("Invalid Application ID"); 
+            }
+        }, 600);
+    }
+
+    function renderTimeline(data) {
+        const box = document.getElementById('trackResultContainer');
+        const statuses = ["Application Received", "Under Processing", "Sent for Verification", "Final Verification by Officer"];
+        
+        let activeIndex = statuses.indexOf(data.status);
+        if(activeIndex === -1) activeIndex = 0; 
+
+        const submitDate = new Date(data.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+
+        let html = `<div class="timeline-container">
+                        <div style="font-size:13px; font-weight:700; color:var(--uidai-dark-blue); margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #eee;">APPLICATION TRACKING</div>
+                        <ul class="timeline">`;
+        
+        statuses.forEach((st, idx) => {
+            let isActive = idx <= activeIndex ? 'active' : '';
+            let dateStr = idx === 0 ? submitDate : (idx <= activeIndex ? 'In Progress' : 'Pending Verification');
+            html += `
+            <li class="timeline-item ${isActive}">
+                <div class="timeline-title">${st}</div>
+                <div class="timeline-date">${dateStr}</div>
+            </li>`;
+        });
+        
+        html += `</ul></div>`;
+        box.innerHTML = html;
+    }
+</script>
+</body>
+</html>
